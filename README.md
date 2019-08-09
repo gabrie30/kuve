@@ -33,3 +33,8 @@ Flags:
   -l, --selector string    selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)
   -s, --shell string       shell to exec with (default "/bin/sh")
 ```
+
+```
+kuve exec helloworld --shell=/bin/bash
+root@helloworld-768cc46c95-66vsm:/#
+```
