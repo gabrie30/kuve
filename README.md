@@ -35,6 +35,6 @@ Flags:
 ```
 
 ```
-kuve exec helloworld --shell=/bin/bash
+$ kuve exec helloworld --shell=/bin/bash
 root@helloworld-768cc46c95-66vsm:/#
 ```
