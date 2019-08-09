@@ -30,7 +30,7 @@ Usage:
 Flags:
   -c, --container string   container to exec into
   -h, --help               help for exec
-  -l, --selector string    selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)
+  -l, --selector string    selector (label query) to filter on
   -s, --shell string       shell to exec with (default "/bin/sh")
 ```
 
