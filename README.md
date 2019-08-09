@@ -2,6 +2,14 @@
 
 > Useful commands for working with kubernetes
 
+# Install
+
+```
+go get github.com/gabrie30/kuve
+```
+
+# Use
+
 ```
 $ kuve --help
 Available Commands:
