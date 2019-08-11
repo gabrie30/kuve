@@ -12,8 +12,8 @@ import (
 // podnodeCmd represents the exec command
 var podnodeCmd = &cobra.Command{
 	Use:   "podnode [pod_name] [namespace]",
-	Short: "View which node a given pod in a given namespace is running on",
-	Long:  `View which node a given pod in a given namespace is running on`,
+	Short: "View which node a given pod in a given namespace is running on (gcp clusters only)",
+	Long:  `View which node a given pod in a given namespace is running on (gcp clusters only)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		podNode(args[0], args[1])
 	},
