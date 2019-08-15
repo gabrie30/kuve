@@ -12,7 +12,7 @@ var logsCmd = &cobra.Command{
 	Short: "Get logs from pods and containers in a given namespace",
 	Long:  `Get logs from pods and containers in a given namespace`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("logs called")
+		fmt.Println("only kuve logs crashed currently implemented")
 	},
 }
 

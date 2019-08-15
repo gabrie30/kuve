@@ -30,6 +30,8 @@ func getCrashedLogs(namespace string) {
 
 	// Iterate over those pods getting their logs
 	fmt.Println("")
+	showAllContainers(namespace)
+	fmt.Println("")
 
 	targetContainer := container
 
@@ -53,6 +55,25 @@ func getCrashedLogs(namespace string) {
 		colorlog.Info(fmt.Sprintf("--------------------------- pod: %s container: %s ---------------------------", pod, targetContainer))
 		fmt.Println(string(container))
 	}
+}
+
+func showAllContainers(namespace string) {
+	cC := fmt.Sprintf("kubectl get pods -n %s -o jsonpath='{.items[*].spec.containers[*].name}' | tr ' ' '\n' | sort -u", namespace)
+
+	c, err := exec.Command("/bin/sh", "-c", cC).Output()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if len(c) <= 0 {
+		log.Fatalf("Cannot find pods with restarts in namespace: %s", namespace)
+	}
+
+	colorlog.Info("*** containers available ***")
+	fmt.Println("")
+	colorlog.Info(string(c))
+	colorlog.Info("***")
+
 }
 
 func podsWithRestarts(namespace string) string {
