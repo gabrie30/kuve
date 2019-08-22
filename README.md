@@ -13,7 +13,7 @@ go get github.com/gabrie30/kuve
 ```
 $ kuve --help
 Available Commands:
-  events      get and filter events from current context
+  events      Get and filter events based off type from current context
   exec        Execs into the first running pod and container of a namespace
   help        Help about any command
   images      Returns a list of images deployed into namespace

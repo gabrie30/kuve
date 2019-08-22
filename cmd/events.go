@@ -15,8 +15,8 @@ var (
 // eventsCmd represents the events command
 var eventsCmd = &cobra.Command{
 	Use:   "events",
-	Short: "get and filter events from current context",
-	Long:  `get and filter events from current context`,
+	Short: "Get and filter events based off type from current context",
+	Long:  `Get and filter events based off type from current context`,
 	Run: func(cmd *cobra.Command, args []string) {
 		filterEvents()
 	},
