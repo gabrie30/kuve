@@ -20,22 +20,14 @@ var logsCmd = &cobra.Command{
 	},
 }
 
-func getLogs(data string) {
+func getLogs(arg string) {
 	var cmd string
 	switch findBy := viper.Get("FIND_PODS_BY"); findBy {
 	case "labels":
-		nsPod := fmt.Sprintf("kubectl get pods --all-namespaces -l=%s=%s --no-headers | awk -v x=1 '$4 >= x' | awk '{print $1,$2}' | head -1", viper.Get("POD_LABEL_KEY"), data)
-		s, _ := exec.Command("/bin/sh", "-c", nsPod).Output()
-		if len(s) == 0 {
-			fmt.Printf("Coud not find pod with label %s=%s", viper.Get("POD_LABEL_KEY"), data)
-			return
-		}
-		words := strings.Fields(string(s))
-		namespace := words[0]
-		pod := words[1]
+		pod, namespace := getPodAndNamespaceFromLabel(arg)
 		cmd = fmt.Sprintf("kubectl logs -f %s --all-containers=true -n %s --limit-bytes=1000000", pod, namespace)
 	case "namespaces":
-		podCmd := fmt.Sprintf("kubectl get pods -n %s --no-headers | awk -v x=1 '$4 >= x' | awk '{print $1}' | head -1", data)
+		podCmd := fmt.Sprintf("kubectl get pods -n %s --no-headers | awk -v x=1 '$4 >= x' | awk '{print $1}' | head -1", arg)
 		pod, _ := exec.Command("/bin/sh", "-c", podCmd).Output()
 
 		s := strings.Trim(string(pod), "\n")
@@ -43,9 +35,9 @@ func getLogs(data string) {
 			fmt.Printf("Coud not find pods in namespace: %s", s)
 			return
 		}
-		cmd = fmt.Sprintf("kubectl logs -f %s --all-containers=true -n %s --limit-bytes=1000000", s, data)
+		cmd = fmt.Sprintf("kubectl logs -f %s --all-containers=true -n %s --limit-bytes=1000000", s, arg)
 	default:
-		log.Fatalf("You must set FIND_PODS_BY in .kuve.yaml")
+		log.Fatalf("You must set FIND_PODS_BY in .kuve.yaml to namespaces or labels")
 	}
 
 	result, _ := exec.Command("/bin/sh", "-c", cmd).Output()

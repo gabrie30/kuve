@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -19,9 +20,9 @@ var (
 
 // execCmd represents the exec command
 var execCmd = &cobra.Command{
-	Use:   "exec [namespace]",
-	Short: "Execs into the first running pod and container of a namespace",
-	Long:  `Execs into the first running pod and container of a namespace`,
+	Use:   "exec [namespace/label value]",
+	Short: "Execs into the first running pod and container",
+	Long:  `Execs into the first running pod and container. If you use the label flag it will over write what is in your .kuve.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		execPod(args[0])
 	},
@@ -34,13 +35,27 @@ func init() {
 	execCmd.Flags().StringVarP(&label, "selector", "l", "", "selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)")
 }
 
-func execPod(namespace string) {
-	pod := getPod(namespace)
+func execPod(arg string) {
+	var execCmd string
 
-	execCmd := fmt.Sprintf("kubectl exec -it %s --namespace=%s -- %s", pod, namespace, shell)
+	pod := getPod(arg)
 
-	if container != "" {
-		execCmd = fmt.Sprintf("kubectl exec -it %s -c=%s --namespace=%s -- %s", pod, container, namespace, shell)
+	switch fetchType := viper.Get("FIND_PODS_BY"); fetchType {
+	case "labels":
+		_, namespace := getPodAndNamespaceFromLabel(arg)
+		execCmd = fmt.Sprintf("kubectl exec -it %s --namespace=%s -- %s", pod, namespace, shell)
+
+		if container != "" {
+			execCmd = fmt.Sprintf("kubectl exec -it %s --namespace=%s -c=%s -- %s", pod, namespace, container, shell)
+		}
+	case "namespaces":
+		execCmd = fmt.Sprintf("kubectl exec -it %s --namespace=%s -- %s", pod, arg, shell)
+
+		if container != "" {
+			execCmd = fmt.Sprintf("kubectl exec -it %s -c=%s --namespace=%s -- %s", pod, container, arg, shell)
+		}
+	default:
+		log.Fatalf("You must set FIND_PODS_BY in .kuve.yaml to namespaces or labels")
 	}
 
 	binary, lookErr := exec.LookPath("kubectl")
@@ -56,11 +71,24 @@ func execPod(namespace string) {
 	}
 }
 
-func getPod(namespace string) string {
-	podCmd := fmt.Sprintf("kubectl get pods -n %s --field-selector=status.phase=Running --no-headers | head -n1 | cut -d ' ' -f1", namespace)
+func getPod(arg string) string {
+	var podCmd string
 
-	if label != "" {
-		podCmd = fmt.Sprintf("kubectl get pods -n %s --selector=%s --field-selector=status.phase=Running --no-headers | head -n1 | cut -d ' ' -f1", namespace, label)
+	switch fetchType := viper.Get("FIND_PODS_BY"); fetchType {
+	case "labels":
+		if label != "" {
+			podCmd = fmt.Sprintf("kubectl get pods -n %s --selector=%s --field-selector=status.phase=Running --no-headers | head -n1 | cut -d ' ' -f1", arg, label)
+		} else {
+			podCmd = fmt.Sprintf("kubectl get pods --all-namespaces -l=%s=%s --field-selector=status.phase=Running --no-headers | head -n1 | cut -d ' ' -f4", viper.Get("POD_LABEL_KEY"), arg)
+		}
+	case "namespaces":
+		podCmd = fmt.Sprintf("kubectl get pods -n %s --field-selector=status.phase=Running --no-headers | head -n1 | cut -d ' ' -f1", arg)
+
+		if label != "" {
+			podCmd = fmt.Sprintf("kubectl get pods -n %s --selector=%s --field-selector=status.phase=Running --no-headers | head -n1 | cut -d ' ' -f1", arg, label)
+		}
+	default:
+		log.Fatalf("You must set FIND_PODS_BY in .kuve.yaml to namespaces or labels")
 	}
 
 	pod, err := exec.Command("/bin/sh", "-c", podCmd).Output()
@@ -69,7 +97,7 @@ func getPod(namespace string) string {
 	}
 
 	if len(pod) <= 0 {
-		log.Fatalf("Cannot find running pods in namespace: %s, matching that criteria", namespace)
+		log.Fatalf("Cannot find running pods with command generated: %s", podCmd)
 	}
 
 	return strings.TrimSpace(string(pod))
