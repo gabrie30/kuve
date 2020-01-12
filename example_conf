@@ -1,0 +1,6 @@
+---
+# Can find pods by namespaces or labels. If labels is set, LABELS_KEY must also be set
+FIND_PODS_BY: "labels"
+
+# This is the key used while searching by labels eg kubectl get pods --all-namespaces -l=LABELS_KEY=some_app
+POD_LABEL_KEY: "app"
