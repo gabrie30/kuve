@@ -20,12 +20,13 @@ var logsCmd = &cobra.Command{
 	},
 }
 
+// TODO: cant use -f bcause the command just writes to some buffer, need to figure out how to stream from the cmd to stdout so user can see logs realtime
 func getLogs(arg string) {
 	var cmd string
 	switch findBy := viper.Get("FIND_PODS_BY"); findBy {
 	case "labels":
 		pod, namespace := getPodAndNamespaceFromLabel(arg)
-		cmd = fmt.Sprintf("kubectl logs -f %s --all-containers=true -n %s --limit-bytes=1000000", pod, namespace)
+		cmd = fmt.Sprintf("kubectl logs %s --all-containers=true -n %s --limit-bytes=1000000", pod, namespace)
 	case "namespaces":
 		podCmd := fmt.Sprintf("kubectl get pods -n %s --no-headers | awk -v x=1 '$4 >= x' | awk '{print $1}' | head -1", arg)
 		pod, _ := exec.Command("/bin/sh", "-c", podCmd).Output()
@@ -35,7 +36,7 @@ func getLogs(arg string) {
 			fmt.Printf("Coud not find pods in namespace: %s", s)
 			return
 		}
-		cmd = fmt.Sprintf("kubectl logs -f %s --all-containers=true -n %s --limit-bytes=1000000", s, arg)
+		cmd = fmt.Sprintf("kubectl logs %s --all-containers=true -n %s --limit-bytes=1000000", s, arg)
 	default:
 		log.Fatalf("You must set FIND_PODS_BY in .kuve.yaml to namespaces or labels")
 	}
