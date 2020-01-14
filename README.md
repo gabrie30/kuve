@@ -13,14 +13,26 @@ curl https://raw.githubusercontent.com/gabrie30/kuve/master/example_conf > $HOME
 
 ```
 $ kuve --help
+A collection of useful commands for working with kubernetes
+
+Usage:
+  kuve [command]
+
 Available Commands:
   events      Get and filter events based off type from current context
-  exec        Execs into the first running pod and container of a namespace
+  exec        Execs into the first running pod and container
   help        Help about any command
   images      Returns a list of images deployed into namespace
-  logs        Get logs from pods and containers
+  logs        Get logs from pods and containers in a given namespace
   podnode     View which node a given pod in a given namespace is running on (gcp clusters only)
+  pods        Returns pods given settings in .kuve.conf
   secrets     Base64 decode and view secrets from a given namespace
+  version     A brief description of your command
+
+Flags:
+      --config string   config file (default is $HOME/.kuve.yaml)
+  -h, --help            help for kuve
+  -t, --toggle          Help message for toggle
 ```
 
 ```
