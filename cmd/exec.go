@@ -38,7 +38,7 @@ func init() {
 func execPod(arg string) {
 	var execCmd string
 
-	pod := getPod(arg)
+	pod := getFirstRunningPod(arg)
 
 	switch fetchType := viper.Get("FIND_PODS_BY"); fetchType {
 	case "labels":
@@ -71,7 +71,7 @@ func execPod(arg string) {
 	}
 }
 
-func getPod(arg string) string {
+func getFirstRunningPod(arg string) string {
 	var podCmd string
 
 	switch fetchType := viper.Get("FIND_PODS_BY"); fetchType {
